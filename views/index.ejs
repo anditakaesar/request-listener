@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>View Outputs</title>
+        <style>
+            @keyframes colorchange {
+                from { background-color: cyan; }
+                to { background-color: white; }
+            }
+
+            body {
+                width: 80%;
+                min-height: 50vh;
+            }
+            nav {
+                position: sticky;
+                margin-top: 10px;
+                margin-bottom: 10px;
+                top: 0;
+            }
+            .output {
+                margin-bottom: 5px;
+                padding: 5px;
+                border: 1px dotted grey;
+                animation-name: colorchange;
+                animation-duration: 4s;
+            }
+
+            .output button {
+                float: right;
+            }
+        </style>
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+        <nav>
+            <button onclick="clearLogs()">Clear</button>
+        </nav>
+        <div id="container">
+            <div class="output">
+                <button onclick="clearLine(this)">click to delete ❌</button>
+                <pre>Initialize</pre>
+            </div>
+        </div>
+        <script type="text/javascript">
+
+            // clear all logs
+            function clearLogs() {
+                var el = document.getElementById('container');
+                el.innerHTML = "";
+            }
+
+            // clear single log
+            function clearLine(el) {
+                var parentEl = el.parentElement.parentElement;
+                parentEl.removeChild(el.parentElement);
+            }
+
+            // create button with prefered btnName, and assign clear current log
+            function createButton(node, btnName) {
+                var btn = document.createElement("button");
+                btn.innerHTML = btnName;
+                btn.onclick = function () {
+                    clearLine(node);
+                }
+                return btn;
+            }
+
+            // api address
+            var api_address = 'http://localhost:3002/';
+            var socket = io.connect(api_address);
+            
+            // main function
+            function appendMessage(msg) {
+                var el = document.getElementById('container');
+                var node = document.createElement("div");
+                node.classList.add("output");
+                
+                var preNode = document.createElement("pre");
+                preNode.innerHTML = JSON.stringify(msg, null, 2);
+                
+                var btnName = msg.date + " ❌";
+                node.appendChild(createButton(preNode, btnName));
+                node.appendChild(preNode);
+                el.appendChild(node);
+
+                // scroll
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+
+            // socket listener
+            socket.on('body_result', (msg) => {
+                appendMessage(msg);
+            });
+
+            var _testTracker = {
+                track: (data) => {
+                    console.table(data);
+                    fetch(api_address, {
+                        method: 'POST',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then({})
+                    .catch(err => { console.error(err) });
+                }
+            }
+
+        </script>
+    </body>
+</html>
