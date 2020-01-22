@@ -22,8 +22,11 @@ app.get('/', (req, res, next) => {
 });
 
 app.post('/', (req, res, next) => {
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    
     let data = {
         date: moment().format('YYYY-MM-DD HH:mm:ss.SSS'),
+        ip: ip,
         data: req.body
     }
 
