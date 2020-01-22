@@ -2,113 +2,9 @@
 <html>
     <head>
         <title>View Outputs</title>
-        <style>
-            @keyframes colorchange {
-                from { background-color: cyan; }
-                to { background-color: white; }
-            }
-
-            body {
-                padding: 10px 0px 10px 0px;
-                margin: 0px;
-            }
-            
-            nav {
-                /* background-color: cyan; */
-                position: sticky;
-                margin: 0px;
-                padding: 10px;
-                left: 0;
-                right: 0;
-                top: 0;
-            }
-
-            #container {
-                margin: 10px;
-            }
-
-            .output {
-                margin-bottom: 5px;
-                padding: 5px;
-                border: 1px dotted grey;
-                animation-name: colorchange;
-                animation-duration: 4s;
-            }
-
-            .output a {
-                float: right;
-            }
-
-            a.button {
-                display:inline-block;
-                padding:0.3em 1.2em;
-                margin:0 0.1em 0.1em 0;
-                border:0.16em solid rgba(255,255,255,0);
-                border-radius:2em;
-                box-sizing: border-box;
-                text-decoration:none;
-                font-family:'Roboto',sans-serif;
-                font-weight:300;
-                color: #666;
-                text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
-                text-align: center;
-                transition: all 0.2s;
-            }
-
-            a.button.default {
-                color: white;
-                background-color: rgba(106, 213, 228, 0.9);
-            }
-
-            a.button.primary {
-                color: white;
-                background-color: rgba(59, 214, 111, 0.9);
-            }
-
-            a.button:hover {
-                border-color: purple;
-            }
-
-            @media all and (max-width:30em){
-                a.button {
-                    display:block;
-                    margin:0.2em auto;
-                    cursor: pointer;
-                }
-            }
-
-            /* scrollbars */
-            /* width */
-            ::-webkit-scrollbar {
-                width: 10px;
-	            background-color: #F5F5F5;
-            }
-
-            /* Track */
-            ::-webkit-scrollbar-track {
-                -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-	            background-color: #F5F5F5;
-            }
-
-            /* Handle */
-            ::-webkit-scrollbar-thumb {
-                background-color: #F90;	
-                background-image: -webkit-linear-gradient(45deg,
-                rgba(255, 255, 255, .2) 25%,
-                transparent 25%,
-                transparent 50%,
-                rgba(255, 255, 255, .2) 50%,
-                rgba(255, 255, 255, .2) 75%,
-                transparent 75%,
-                transparent)
-            }
-
-            /* Handle on hover */
-            ::-webkit-scrollbar-thumb:hover {
-                background: #555;
-            }
-
-        </style>
+        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/styles/solarized-dark.css">
+        <script src="/highlight.pack.js"></script>
         <script src="/socket.io/socket.io.js"></script>
     </head>
     <body>
@@ -118,10 +14,26 @@
         <div id="container">
             <div class="output">
                 <a onclick="clearLine(this)" class="button default" href="javascript:void(0)">click to delete ❌</a>
-                <pre>Initialize</pre>
+                <pre id="init">
+                    <code class="json">
+                    </code>
+                </pre>
             </div>
         </div>
         <script type="text/javascript">
+            window.onload = function () {
+                var pre = document.getElementById("init");
+                var code = pre.querySelector("code");
+                var data = {
+                    message: "A request will appear here",
+                    data: {
+                        close: "click close button to delete line"
+                    }
+                }
+                code.innerHTML = JSON.stringify(data, null, 2);
+                hljs.highlightBlock(code);
+            }
+            
              // api address
             var api_address = 'http://localhost:3002/';
             var socket = io.connect(api_address);
@@ -157,7 +69,11 @@
                 node.classList.add("output");
                 
                 var preNode = document.createElement("pre");
-                preNode.innerHTML = JSON.stringify(msg, null, 2);
+                var codeNode = document.createElement("code");
+                codeNode.classList.add("json");
+                codeNode.innerHTML = JSON.stringify(msg, null, 2);
+
+                preNode.appendChild(codeNode);
                 
                 var btnName = msg.date + " ❌";
                 node.appendChild(createButton(preNode, btnName));
@@ -166,6 +82,9 @@
 
                 // scroll
                 window.scrollTo(0, document.body.scrollHeight);
+
+                hljs.highlightBlock(preNode);
+
             }
 
             // socket listener
@@ -183,7 +102,6 @@
 
             var _testTracker = {
                 track: (data) => {
-                    console.table(data);
                     fetch(api_address, {
                         method: 'POST',
                         mode: 'cors',

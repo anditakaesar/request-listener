@@ -1,6 +1,7 @@
 const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 const http = require('http').Server(app);
@@ -9,6 +10,7 @@ const moment = require('moment');
 
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.static('public'));
 
 io.on('connect', (socket) => {
     console.log('a client connected');
