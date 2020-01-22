@@ -33,7 +33,9 @@ nav {
 }
 
 .output a {
-    float: right;
+    position: absolute;
+    z-index: 1;
+    right: 40px;
 }
 
 a.button {
@@ -54,7 +56,7 @@ a.button {
 
 a.button.default {
     color: white;
-    background-color: rgba(106, 213, 228, 0.9);
+    background-color: rgba(80, 226, 245, 0.9);
 }
 
 a.button.primary {
